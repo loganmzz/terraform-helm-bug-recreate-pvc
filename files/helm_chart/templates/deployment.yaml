@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ include "helm-chart.fullname" . }}
+    labels:
+        {{- include "helm-chart.labels" . | nindent 8 }}
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            {{- include "helm-chart.selectorLabels" . | nindent 12 }}
+    template:
+        metadata:
+            labels:
+                {{- include "helm-chart.selectorLabels" . | nindent 16 }}
+        spec:
+            volumes:
+              - name: pvc
+                persistentVolumeClaim:
+                    claimName: {{ include "helm-chart.fullname" . }}
+            containers:
+              - name: main
+                image: "nginx:{{ .Chart.AppVersion }}"
+                volumeMounts:
+                  - mountPath: /data
+                    name: pvc
+                ports:
+                  - name: http
+                    containerPort: 80
